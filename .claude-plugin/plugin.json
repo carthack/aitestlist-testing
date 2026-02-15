@@ -1,0 +1,13 @@
+{
+  "name": "aitestlist-testing",
+  "description": "AI TestList testing ecosystem - create, execute, and report QA tests via Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "9524-2426 Quebec Inc.",
+    "email": "support@aitestlist.com"
+  },
+  "homepage": "https://aitestlist.com",
+  "repository": "https://github.com/carthack/aitestlist-testing",
+  "license": "MIT",
+  "keywords": ["qa", "testing", "playwright", "stripe", "aitestlist"]
+}
