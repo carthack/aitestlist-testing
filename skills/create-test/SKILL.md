@@ -7,43 +7,28 @@ description: Cree et soumet des tests a AI TestList via l'API REST. Genere des t
 
 Skill core pour creer et soumettre des tests a AI TestList.
 
-## API REST - Variables requises
+## Prerequis
 
-**Variables d'environnement:**
-- `AITESTLIST_TOKEN` - Token d'authentification
+Appeler `/aitestlist-testing:preflight` en premiere etape.
+Ce skill fournit: `URL` (serveur), `AITESTLIST_TOKEN` (valide), `USER_LANG` (langue).
 
-**URL du serveur:** `http://localhost:8001`
-
-Si le token n'est pas defini, informer l'utilisateur d'executer le setup dans les parametres de l'application (onglet Integration).
-
-### Verifier la connexion
-```bash
-curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/status"
-```
-
-### Obtenir la langue de l'utilisateur
-```bash
-curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/language"
-```
-Retourne: `{"language": "en"}` ou `{"language": "fr"}`
+## API REST
 
 ### Obtenir les categories
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/categories?lang=fr"
+  "${URL}/api/categories?lang=${USER_LANG}"
 ```
 
 ### Obtenir les projets
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/projects"
+  "${URL}/api/projects"
 ```
 
 ### Soumettre un test
 ```bash
-curl -s -X POST "http://localhost:8001/api/tests/submit" \
+curl -s -X POST "${URL}/api/tests/submit" \
   -H "Authorization: Bearer $AITESTLIST_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -58,20 +43,19 @@ curl -s -X POST "http://localhost:8001/api/tests/submit" \
 
 ## Workflow
 
-1. **Verifier le token** - Appeler `/api/status`
-2. **Obtenir la langue** - Appeler `/api/language` pour la preference de l'utilisateur
-3. **Obtenir les categories** - Appeler `/api/categories?lang={langue}` avec la langue de l'utilisateur
-4. **Analyser le contexte** - Comprendre ce qui doit etre teste (lire `.aitestlist/project-analysis.md` si disponible)
-5. **Detecter les specialites** - Si le projet contient des systemes de paiement, appeler aussi `/aitestlist-testing:create-payment` pour generer les tests billing
-6. **Generer les taches** - Creer des taches **DANS LA LANGUE DE L'UTILISATEUR** (etape 2), PAS la langue de la conversation
-7. **Soumettre** - Appeler `/api/tests/submit`
-8. **Confirmer** - Informer que le test est dans la queue d'import
+1. **Preflight** - Appeler `/aitestlist-testing:preflight` (token, langue, URL)
+2. **Obtenir les categories** - Appeler `/api/categories?lang=${USER_LANG}`
+3. **Analyser le contexte** - Comprendre ce qui doit etre teste (lire `.aitestlist/project-analysis.md` si disponible)
+4. **Detecter les specialites** - Si le projet contient des systemes de paiement, appeler aussi `/aitestlist-testing:create-payment` pour generer les tests billing
+5. **Generer les taches** - Creer des taches **DANS LA LANGUE DE L'UTILISATEUR** (`USER_LANG`), PAS la langue de la conversation
+6. **Soumettre** - Appeler `/api/tests/submit`
+7. **Confirmer** - Informer que le test est dans la queue d'import
 
-**IMPORTANT:** Toujours generer dans la langue configuree dans AITestList (etape 2), independamment de la langue de la conversation:
+**IMPORTANT:** Toujours generer dans la langue configuree dans AITestList (`USER_LANG` du preflight), independamment de la langue de la conversation:
 - **Nom du test** - dans la langue de l'utilisateur
 - **Titres des taches** - dans la langue de l'utilisateur
 - **Descriptions des taches** - dans la langue de l'utilisateur
-- **Categories** - utiliser les categories de l'etape 3 (deja dans la bonne langue)
+- **Categories** - utiliser les categories de l'etape 2 (deja dans la bonne langue)
 
 ## Format des taches
 
@@ -95,7 +79,7 @@ curl -s -X POST "http://localhost:8001/api/tests/submit" \
 
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/categories?lang={langue_utilisateur}"
+  "${URL}/api/categories?lang=${USER_LANG}"
 ```
 
 L'API retourne les categories dans la bonne langue:
@@ -236,5 +220,5 @@ Les skills specialises retournent des taches supplementaires a ajouter au test.
 Informer l'utilisateur:
 1. Nombre de taches creees
 2. Categories utilisees
-3. Le test est dans la queue d'import: **http://localhost:8001/import-queue**
+3. Le test est dans la queue d'import: **${URL}/import-queue**
 4. L'utilisateur doit approuver l'import pour creer le test

@@ -79,7 +79,7 @@ Le skill core detecte automatiquement les specialites et delegue:
 
 Apres que les skills ont soumis les tests, informer l'utilisateur:
 - Nombre de taches creees
-- Lien vers la queue d'import (http://localhost:8001/import-queue)
+- Lien vers la queue d'import
 
 ## Notes
 

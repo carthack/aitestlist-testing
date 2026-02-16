@@ -66,7 +66,7 @@ Execute ces tests pour la queue #42:
 
 Rules globales: [rules]
 Rules projet: [rules]
-URL: http://localhost:8001
+URL: ${URL} (from preflight)
 Mode auto-fix: false
 ```
 

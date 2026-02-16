@@ -16,6 +16,7 @@
       "source": "./",
       "strict": false,
       "skills": [
+        "./skills/preflight",
         "./skills/create-test",
         "./skills/create-payment",
         "./skills/exec-test",

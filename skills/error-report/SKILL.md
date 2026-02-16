@@ -9,35 +9,28 @@ Skill pour analyser les taches echouees et generer un rapport d'erreurs PDF.
 Peut etre appele automatiquement par l'agent `test-reporter` apres une execution,
 ou manuellement via `/aitestlist-testing:report`.
 
+## Prerequis
+
+Appeler `/aitestlist-testing:preflight` en premiere etape.
+Ce skill fournit: `URL` (serveur), `AITESTLIST_TOKEN` (valide), `USER_LANG` (langue).
+
 ## API REST
-
-### Verifier la connexion
-```bash
-curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/status"
-```
-
-### Obtenir la langue de l'utilisateur
-```bash
-curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/language"
-```
 
 ### Obtenir les projets
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/projects"
+  "${URL}/api/projects"
 ```
 
 ### Obtenir les taches echouees
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
-  "http://localhost:8001/api/projects/{project_id}/failed-tasks"
+  "${URL}/api/projects/{project_id}/failed-tasks"
 ```
 
 ### Envoyer les diagnostics
 ```bash
-curl -s -X POST "http://localhost:8001/api/reports/error-analysis" \
+curl -s -X POST "${URL}/api/reports/error-analysis" \
   -H "Authorization: Bearer $AITESTLIST_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -54,13 +47,12 @@ curl -s -X POST "http://localhost:8001/api/reports/error-analysis" \
 
 ## Workflow
 
-1. **Verifier le token** - Appeler `/api/status`
-2. **Obtenir la langue** - Appeler `/api/language`
-3. **Lister les projets** - Appeler `/api/projects` et laisser l'utilisateur choisir (ou recevoir le project_id du caller)
-4. **Recuperer les taches echouees** - Appeler `/api/projects/{id}/failed-tasks`
-5. **Analyser chaque tache** - Pour chaque tache echouee, analyser en profondeur
-6. **Envoyer les diagnostics** - Appeler `/api/reports/error-analysis`
-7. **Confirmer** - Informer l'utilisateur que le rapport est disponible
+1. **Preflight** - Appeler `/aitestlist-testing:preflight` (token, langue, URL)
+2. **Lister les projets** - Appeler `/api/projects` et laisser l'utilisateur choisir (ou recevoir le project_id du caller)
+3. **Recuperer les taches echouees** - Appeler `/api/projects/{id}/failed-tasks`
+4. **Analyser chaque tache** - Pour chaque tache echouee, analyser en profondeur
+5. **Envoyer les diagnostics** - Appeler `/api/reports/error-analysis`
+6. **Confirmer** - Informer l'utilisateur que le rapport est disponible
 
 ## Analyse des taches echouees
 
@@ -106,9 +98,9 @@ Pour chaque tache echouee, produire un diagnostic structure:
 
 ## Langue du rapport
 
-Les diagnostics doivent etre rediges dans la langue de l'utilisateur (etape 2):
-- Si `language: "fr"` → diagnostics en francais
-- Si `language: "en"` → diagnostics en anglais
+Les diagnostics doivent etre rediges dans la langue de l'utilisateur (`USER_LANG` du preflight):
+- Si `USER_LANG` = `fr` → diagnostics en francais
+- Si `USER_LANG` = `en` → diagnostics en anglais
 
 ## Appel automatique par test-reporter
 
@@ -122,4 +114,4 @@ Quand appele par l'agent `test-reporter` apres une execution:
 Informer l'utilisateur:
 1. Nombre de taches analysees
 2. Le rapport PDF a ete genere et stocke sur AI TestList
-3. Pour le telecharger: **http://localhost:8001/reports** → selectionner le projet → section "Rapports disponibles"
+3. Pour le telecharger: **${URL}/reports** → selectionner le projet → section "Rapports disponibles"

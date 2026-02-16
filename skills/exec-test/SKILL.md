@@ -9,30 +9,28 @@ Skill core pour executer les tests AI TestList via MCP Playwright.
 
 ## Usage
 
-/aitestlist-testing:exec <queue_id> [--url <aitestlist_url>]
+/aitestlist-testing:exec <queue_id>
 
 ## Parametres
 
 - queue_id: ID de la file d'execution approuvee (requis)
-- --url: URL du serveur AITestList (defaut: http://localhost:8001)
-
-## Variables d'environnement requises
-
-- AITESTLIST_TOKEN: Token API Bearer pour l'authentification
 
 ## Etape 1: Verifications prealables
+
+### Etape 1A: Preflight
+
+Appeler `/aitestlist-testing:preflight` pour obtenir `URL`, `AITESTLIST_TOKEN`, `USER_LANG`.
+
+**IMPORTANT:** Tous les commentaires de resultats et le rapport final doivent etre rediges
+dans la langue `USER_LANG`.
+
+### Etape 1B: Verifier MCP Playwright
 
 Verifier que MCP Playwright est disponible en tentant un appel simple.
 Si MCP Playwright n'est pas disponible, informer l'utilisateur:
 "MCP Playwright n'est pas configure. Ajoutez-le avec: /mcp add playwright"
 
-Verifier que le token est defini:
-```bash
-echo $AITESTLIST_TOKEN
-```
-Si vide: "Definissez votre token: export AITESTLIST_TOKEN=<votre_token>"
-
-### Etape 1B: Verifier le mode multi-agent (teams)
+### Etape 1C: Verifier le mode multi-agent (teams)
 
 Verifier si le mode multi-agent est active dans les settings de Claude Code:
 
@@ -50,17 +48,6 @@ Chercher si la cle `env` contient `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`.
 - Demander a l'utilisateur s'il veut l'activer pour executer en parallele
 - Si oui: modifier `~/.claude/settings.json` pour ajouter la cle
 - Variable interne: `TEAMS_MODE=true` ou `false`
-
-### Etape 1C: Detecter la langue de l'utilisateur
-
-```bash
-curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" "${URL}/api/language"
-```
-
-Variable interne: `USER_LANG` = valeur retournee (defaut: `fr` si erreur)
-
-**IMPORTANT:** Tous les commentaires de resultats et le rapport final doivent etre rediges
-dans la langue `USER_LANG`.
 
 ### Etape 1D: Detecter le mode d'execution
 
