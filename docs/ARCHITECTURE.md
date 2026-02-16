@@ -48,7 +48,7 @@ API REST AITestList ($AITESTLIST_URL)
 
 **Architecture:**
 - Les **agents** sont les points d'entree principaux (3 agents)
-- Les **skills** sont des instructions prechargees dans les agents (10 skills)
+- Les **skills** sont des instructions prechargees dans les agents (14 skills)
 - Un seul skill est user-invocable: `/status`
 - Aucun skill n'appelle un autre skill — tout est prechage via `skills:` field
 
@@ -68,7 +68,7 @@ aitestlist-testing/
 |   |-- test-executor.md         # Execution tests via Playwright
 |   |-- test-reporter.md         # Reporting + rapport d'erreurs
 |
-|-- skills/                      # Instructions prechargees (10 skills)
+|-- skills/                      # Instructions prechargees (14 skills)
 |   |-- status/SKILL.md          # Diagnostic connexion (seul user-invocable)
 |   |-- preflight/SKILL.md       # Auth centralisee (token, langue, URL)
 |   |-- create-test/SKILL.md     # Creation de tests QA
@@ -79,6 +79,10 @@ aitestlist-testing/
 |   |-- exec-db-elevation/SKILL.md # Elevation temporaire de permissions BD
 |   |-- report-live/SKILL.md     # Push des resultats en temps reel
 |   |-- error-report/SKILL.md    # Analyse des echecs + rapport PDF
+|   |-- pdf/SKILL.md             # Generation/manipulation de PDF (+ scripts)
+|   |-- docx/SKILL.md            # Creation/edition de documents Word (+ scripts)
+|   |-- xlsx/SKILL.md            # Creation/edition de spreadsheets Excel (+ scripts)
+|   |-- pptx/SKILL.md            # Creation/edition de presentations PowerPoint (+ scripts)
 |
 |-- docs/                        # Documentation
 |   |-- ARCHITECTURE.md          # Ce fichier
@@ -482,6 +486,23 @@ Push un resultat individuel via `POST /api/execution-queue/{id}/result`.
 
 Analyse taches echouees. Diagnostic: error, cause, 3 solutions actionnables.
 Envoie au serveur qui genere le PDF.
+
+---
+
+### Document generation skills (pdf, docx, xlsx, pptx)
+
+4 skills utilitaires pour la generation de documents. Non precharges dans les agents actuellement
+(trop volumineux). Disponibles pour usage futur: rapports custom, exports client, etc.
+
+| Skill | Fichier | Contenu |
+|-------|---------|---------|
+| pdf | `skills/pdf/SKILL.md` | pypdf, pdfplumber, reportlab + 8 scripts (forms, OCR) |
+| docx | `skills/docx/SKILL.md` | docx-js, XML editing + office toolkit (pack/unpack/validate) |
+| xlsx | `skills/xlsx/SKILL.md` | openpyxl, pandas + office toolkit + recalc.py |
+| pptx | `skills/pptx/SKILL.md` | pptxgenjs, editing + office toolkit + thumbnail.py |
+
+Chaque skill inclut ses propres `scripts/` et `LICENSE.txt`.
+Aucun n'est visible dans le menu `/` (`user-invocable: false`).
 
 ---
 
