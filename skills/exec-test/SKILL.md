@@ -8,14 +8,6 @@ user-invocable: false
 
 Skill core pour executer les tests AI TestList via MCP Playwright.
 
-## Usage
-
-/aitestlist-testing:exec <queue_id>
-
-## Parametres
-
-- queue_id: ID de la file d'execution approuvee (requis)
-
 ## Variables disponibles
 
 Ce skill est prechage dans l'agent test-executor via le champ `skills:`.
@@ -35,26 +27,7 @@ Verifier que MCP Playwright est disponible en tentant un appel simple.
 Si MCP Playwright n'est pas disponible, informer l'utilisateur:
 "MCP Playwright n'est pas configure. Ajoutez-le avec: /mcp add playwright"
 
-### Etape 1B: Verifier le mode multi-agent (teams)
-
-Verifier si le mode multi-agent est active dans les settings de Claude Code:
-
-```bash
-cat ~/.claude/settings.json 2>/dev/null
-```
-
-Chercher si la cle `env` contient `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`.
-
-**Si active:**
-- Informer: "Mode multi-agent (teams) active. Les tests seront executes en parallele."
-- Variable interne: `TEAMS_MODE=true`
-
-**Si pas active:**
-- Demander a l'utilisateur s'il veut l'activer pour executer en parallele
-- Si oui: modifier `~/.claude/settings.json` pour ajouter la cle
-- Variable interne: `TEAMS_MODE=true` ou `false`
-
-### Etape 1C: Detecter le mode d'execution
+### Etape 1B: Detecter le mode d'execution
 
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" "${URL}/api/settings/exec-mode"
@@ -103,26 +76,18 @@ Afficher les rules a l'ecran pour que l'agent les connaisse avant d'executer.
 
 **Ces rules sont des directives.** L'agent doit les respecter pendant l'execution.
 
-## Etape 3 - Delegation aux skills specialises
+## Etape 3b - Delegation aux instructions specialisees
 
-Avant d'executer chaque tache, verifier si elle necessite un skill specialise:
+Avant d'executer chaque tache, verifier si elle necessite des instructions specialisees
+(prechargees dans l'agent via `skills:`):
 
-| Condition | Skill a appeler | Action |
-|-----------|-----------------|--------|
-| Description contient `[PAYMENT_TEST]` | `/aitestlist-testing:exec-payment` | Verifie toggle + execute avec cartes test |
-| Description contient `[CREATE_TEST_EMAIL:...]` | `/aitestlist-testing:exec-email` | Cree alias, attend email, extrait liens |
-| Tache echoue par restriction plan/role | `/aitestlist-testing:exec-db-elevation` | Eleve permissions BD, re-teste, restaure |
-
-Le skill specialise retourne le resultat (status + comment) que le core utilise pour reporter.
+| Condition | Instructions | Action |
+|-----------|-------------|--------|
+| Description contient `[PAYMENT_TEST]` | exec-payment | Verifie toggle + execute avec cartes test |
+| Description contient `[CREATE_TEST_EMAIL:...]` | exec-email | Cree alias, attend email, extrait liens |
+| Tache echoue par restriction plan/role | exec-db-elevation | Eleve permissions BD, re-teste, restaure |
 
 ## Etape 4: Executer les tests via MCP Playwright
-
-**Mode teams (TEAMS_MODE=true):** Utiliser le Task tool pour lancer plusieurs agents en parallele.
-Chaque agent recoit un sous-ensemble de tests + les rules. Spawner aussi un agent `test-reporter`
-pour le reporting live.
-
-**Mode sequentiel (TEAMS_MODE=false):** Executer tous les tests un par un.
-Apres chaque tache, appeler `/aitestlist-testing:report-live` pour push le statut.
 
 Pour chaque test:
 1. Afficher le nom du test
@@ -133,7 +98,7 @@ Pour chaque test:
    d. Interpreter les etapes et les executer via MCP Playwright
    e. Verifier le resultat attendu
    f. Capturer: passed/failed/error avec message si echec
-   g. **Reporter le resultat live** via `/aitestlist-testing:report-live`
+   g. **Reporter le resultat live** (instructions report-live dans le contexte de l'agent)
    h. **Si auto_fix_enabled ET la tache a echoue:**
       1. Analyser le code source du projet pour trouver la cause
       2. Appliquer le fix dans le code
@@ -162,8 +127,7 @@ Les refs changent apres chaque action — toujours reprendre un snapshot avant d
 
 ## Etape 5: Reporter les resultats a AITestList
 
-En mode sequentiel, les resultats sont deja envoyes live (etape 4g).
-En mode teams, l'agent test-reporter s'en charge.
+Les resultats sont deja envoyes live (etape 4g).
 
 Apres tous les tests, envoyer le batch final pour s'assurer que tout est enregistre:
 
@@ -193,10 +157,6 @@ qui n'existe pas encore, marquer comme `succes` avec commentaire "Suggestion : .
 Reserver `echec` aux fonctionnalites qui EXISTENT mais sont CASSEES.
 
 ## Etape 6: Rapport final (dans USER_LANG)
-
-En mode sequentiel: afficher le resume.
-En mode teams: l'agent test-reporter genere le resume + appelle `/aitestlist-testing:error-report`
-si il y a des echecs.
 
 ```
 === RESUME ===

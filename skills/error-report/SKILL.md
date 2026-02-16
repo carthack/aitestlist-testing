@@ -7,8 +7,8 @@ user-invocable: false
 # Error Analysis Report
 
 Skill pour analyser les taches echouees et generer un rapport d'erreurs PDF.
-Peut etre appele automatiquement par l'agent `test-reporter` apres une execution,
-ou manuellement via `/aitestlist-testing:report`.
+Prechage dans l'agent `test-reporter` via le champ `skills:`.
+Utilise apres une execution ou invoque directement via `@test-reporter`.
 
 ## Variables disponibles
 

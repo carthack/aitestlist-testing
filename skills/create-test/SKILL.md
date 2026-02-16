@@ -146,15 +146,13 @@ tout ce qui a ete cree pendant le test (comptes, projets, donnees, etc.).
 ## Delegation aux skills specialises
 
 Lors de l'analyse du projet (etape 4), si des systemes specialises sont detectes,
-appeler les skills de creation correspondants:
+suivre les instructions specialisees (prechargees dans l'agent via `skills:`):
 
-| Detection | Skill a appeler |
-|-----------|-----------------|
-| Stripe / PayPal detecte | `/aitestlist-testing:create-payment` |
-| (futur) Auth complexe | `/aitestlist-testing:create-security` |
-| (futur) UI riche | `/aitestlist-testing:create-accessibility` |
-
-Les skills specialises retournent des taches supplementaires a ajouter au test.
+| Detection | Instructions |
+|-----------|-------------|
+| Stripe / PayPal detecte | create-payment (prechage dans l'agent) |
+| (futur) Auth complexe | create-security |
+| (futur) UI riche | create-accessibility |
 
 ## Exemples complets
 
