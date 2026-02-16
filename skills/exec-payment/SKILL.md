@@ -1,6 +1,7 @@
 ---
 name: exec-payment
 description: Execute les taches de test payment (Stripe Elements, Stripe Checkout, PayPal sandbox). Verifie le toggle payment testing avant execution. Appele par exec-test quand une tache contient [PAYMENT_TEST].
+user-invocable: false
 ---
 
 # Execute Payment Tests

@@ -1,6 +1,7 @@
 ---
 name: exec-email
 description: Gere les aliases email temporaires pour les tests (creation, attente, lecture, nettoyage). Utilise l'API AITestList comme proxy vers Zoho. Appele par exec-test quand une tache contient [CREATE_TEST_EMAIL].
+user-invocable: false
 ---
 
 # Execute Email Testing

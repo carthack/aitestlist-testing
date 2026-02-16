@@ -1,6 +1,7 @@
 ---
 name: report-live
 description: Pousse les resultats de test a AITestList en temps reel, tache par tache. Le client voit les statuts se mettre a jour en direct. Appele par exec-test apres chaque tache ou par l'agent test-reporter en mode teams.
+user-invocable: false
 ---
 
 # Report Live

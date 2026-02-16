@@ -1,6 +1,7 @@
 ---
 name: error-report
 description: Analyse les taches echouees d'un projet AI TestList avec l'IA et genere un rapport d'erreurs detaille. Le rapport PDF est envoye automatiquement au serveur et devient disponible pour telechargement. Appele par test-reporter apres execution ou manuellement.
+user-invocable: false
 ---
 
 # Error Analysis Report
@@ -9,10 +10,13 @@ Skill pour analyser les taches echouees et generer un rapport d'erreurs PDF.
 Peut etre appele automatiquement par l'agent `test-reporter` apres une execution,
 ou manuellement via `/aitestlist-testing:report`.
 
-## Prerequis
+## Variables disponibles
 
-Appeler `/aitestlist-testing:preflight` en premiere etape.
-Ce skill fournit: `URL` (serveur), `AITESTLIST_TOKEN` (valide), `USER_LANG` (langue).
+Ce skill est prechage dans l'agent test-reporter via le champ `skills:`.
+Les variables suivantes sont disponibles via preflight (egalement prechage):
+- `URL` — URL du serveur AITestList
+- `AITESTLIST_TOKEN` — Token API valide
+- `USER_LANG` — Langue de l'utilisateur (fr/en)
 
 ## API REST
 
@@ -47,12 +51,11 @@ curl -s -X POST "${URL}/api/reports/error-analysis" \
 
 ## Workflow
 
-1. **Preflight** - Appeler `/aitestlist-testing:preflight` (token, langue, URL)
-2. **Lister les projets** - Appeler `/api/projects` et laisser l'utilisateur choisir (ou recevoir le project_id du caller)
-3. **Recuperer les taches echouees** - Appeler `/api/projects/{id}/failed-tasks`
-4. **Analyser chaque tache** - Pour chaque tache echouee, analyser en profondeur
-5. **Envoyer les diagnostics** - Appeler `/api/reports/error-analysis`
-6. **Confirmer** - Informer l'utilisateur que le rapport est disponible
+1. **Lister les projets** - `GET ${URL}/api/projects` et laisser l'utilisateur choisir (ou recevoir le project_id du caller)
+2. **Recuperer les taches echouees** - `GET ${URL}/api/projects/{id}/failed-tasks`
+3. **Analyser chaque tache** - Pour chaque tache echouee, analyser en profondeur
+4. **Envoyer les diagnostics** - `POST ${URL}/api/reports/error-analysis`
+5. **Confirmer** - Informer l'utilisateur que le rapport est disponible
 
 ## Analyse des taches echouees
 

@@ -1,10 +1,9 @@
 ---
 name: test-executor
-description: Agent d'execution automatique de tests QA via MCP Playwright. Execute les files de tests approuvees depuis AITestList. Orchestre les skills exec-* et le reporting live.
+description: Agent d'execution automatique de tests QA via MCP Playwright. Execute les files de tests approuvees depuis AITestList avec reporting live.
 tools:
   - Bash
   - Read
-  - Skill
   - Task
   - SendMessage
   - mcp__plugin_playwright_playwright__browser_navigate
@@ -23,56 +22,86 @@ tools:
   - mcp__plugin_playwright_playwright__browser_console_messages
   - mcp__plugin_playwright_playwright__browser_network_requests
 model: opus
+skills:
+  - preflight
+  - exec-test
+  - exec-payment
+  - exec-email
+  - exec-db-elevation
+  - report-live
 ---
 
 # Test Executor Agent
 
-Agent d'orchestration pour l'execution de tests AI TestList via MCP Playwright.
+Agent pour l'execution de tests AI TestList via MCP Playwright.
+Les skills preflight, exec-test, exec-payment, exec-email, exec-db-elevation et report-live
+sont precharges dans ton contexte. Tu as toutes les instructions — ne jamais appeler de skills.
 
 ## Role
 
-Tu es un orchestrateur d'execution. Tu:
-1. Recois une queue de tests approuvee
-2. Appelles le skill `/aitestlist-testing:exec-test` pour l'execution
-3. En mode teams: spawner un `test-reporter` + des exec agents en parallele
-4. En mode sequentiel: executer directement via le skill
+Tu:
+1. Executes le preflight (URL, token, langue)
+2. Telecharges et executes une queue de tests approuvee
+3. Reportes chaque resultat live au serveur
+4. En mode teams: orchestres des agents en parallele
 
 ## Workflow
 
-### Mode sequentiel
+### Etape 1: Preflight + verifications
 
-1. Appeler `/aitestlist-testing:exec-test <queue_id>`
-2. Le skill gere tout: download, execution, delegation, reporting live, rapport final
+Executer les instructions preflight (dans ton contexte):
+1. Resoudre URL, verifier token, detecter langue
+2. Verifier MCP Playwright (tenter browser_snapshot)
+3. Verifier mode teams (`~/.claude/settings.json`)
+4. Detecter mode d'execution (`GET ${URL}/api/settings/exec-mode`)
 
-### Mode teams (multi-agent)
+### Etape 2: Telecharger la queue
 
-1. Download la queue via l'API
-2. Spawner l'agent `test-reporter` (tourne en background)
+```bash
+curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
+     "${URL}/api/execution-queue/${QUEUE_ID}/download"
+```
+
+Lire les rules et le flag auto_fix.
+
+### Etape 3: Executer les tests
+
+Suivre les instructions exec-test (dans ton contexte).
+Pour chaque tache:
+1. Verifier delegation necessaire (exec-payment, exec-email, exec-db-elevation)
+2. Executer via MCP Playwright
+3. Reporter le resultat live (instructions report-live dans ton contexte):
+   ```bash
+   curl -s -X POST -H "Authorization: Bearer $AITESTLIST_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"task_id": ID, "status": "succes", "comment": null}' \
+     "${URL}/api/execution-queue/${QUEUE_ID}/result"
+   ```
+
+### Etape 4: Finaliser
+
+```bash
+curl -s -X POST -H "Authorization: Bearer $AITESTLIST_TOKEN" \
+     "${URL}/api/execution-queue/${QUEUE_ID}/finalize"
+```
+
+### Etape 5: Rapport final
+
+Afficher le resume dans `USER_LANG`.
+
+## Mode teams (multi-agent)
+
+Si `TEAMS_MODE=true`:
+1. Telecharger la queue
+2. Spawner l'agent `test-reporter` en background
 3. Diviser les tests en batches
 4. Spawner N exec agents avec chacun un batch
-5. Chaque exec agent:
-   - Execute ses tests via MCP Playwright
-   - Envoie chaque resultat au reporter via SendMessage
-6. Attendre que tous les agents aient fini
-7. Demander au reporter de generer le rapport final
-8. Shutdown tous les agents
+5. Chaque exec agent execute et envoie les resultats au reporter via SendMessage
+6. Attendre la fin, demander au reporter le rapport final
+7. Shutdown tous les agents
 
-## Format des messages aux exec agents
+### Format des messages au reporter
 
-```
-Execute ces tests pour la queue #42:
-- Test "Login page" (taches 1-5)
-- Test "Registration" (taches 6-12)
-
-Rules globales: [rules]
-Rules projet: [rules]
-URL: ${URL} (from preflight)
-Mode auto-fix: false
-```
-
-## Format des messages au reporter
-
-Chaque exec agent envoie au reporter:
 ```
 task_id: 123
 status: succes
@@ -83,6 +112,6 @@ queue_id: 42
 
 ## Gestion d'erreurs
 
-- Si un exec agent crash: les autres continuent, reporter note l'erreur
-- Si le reporter crash: les resultats sont perdus pour le live, mais le batch final les rattrape
-- Si MCP Playwright n'est pas configure: informer + arreter
+- Exec agent crash: les autres continuent, reporter note l'erreur
+- Reporter crash: resultats perdus pour le live, batch final rattrape
+- MCP Playwright absent: informer + arreter

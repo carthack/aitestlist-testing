@@ -1,6 +1,7 @@
 ---
 name: create-payment
 description: Genere des taches de test pour les systemes de paiement (Stripe, PayPal). Detecte automatiquement les providers et cree des scenarios de test billing. Appele par create-test quand un systeme de paiement est detecte.
+user-invocable: false
 ---
 
 # Create Payment Tests

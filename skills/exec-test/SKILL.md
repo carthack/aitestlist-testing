@@ -1,6 +1,7 @@
 ---
 name: exec-test
 description: Telecharge une file d'execution approuvee depuis AITestList et execute les tests localement via MCP Playwright dans Claude Code. Skill core du plugin aitestlist-testing.
+user-invocable: false
 ---
 
 # Execute Tests
@@ -15,22 +16,26 @@ Skill core pour executer les tests AI TestList via MCP Playwright.
 
 - queue_id: ID de la file d'execution approuvee (requis)
 
-## Etape 1: Verifications prealables
+## Variables disponibles
 
-### Etape 1A: Preflight
-
-Appeler `/aitestlist-testing:preflight` pour obtenir `URL`, `AITESTLIST_TOKEN`, `USER_LANG`.
+Ce skill est prechage dans l'agent test-executor via le champ `skills:`.
+Les variables suivantes sont disponibles via preflight (egalement prechage):
+- `URL` — URL du serveur AITestList
+- `AITESTLIST_TOKEN` — Token API valide
+- `USER_LANG` — Langue de l'utilisateur (fr/en)
 
 **IMPORTANT:** Tous les commentaires de resultats et le rapport final doivent etre rediges
 dans la langue `USER_LANG`.
 
-### Etape 1B: Verifier MCP Playwright
+## Etape 1: Verifications prealables
+
+### Etape 1A: Verifier MCP Playwright
 
 Verifier que MCP Playwright est disponible en tentant un appel simple.
 Si MCP Playwright n'est pas disponible, informer l'utilisateur:
 "MCP Playwright n'est pas configure. Ajoutez-le avec: /mcp add playwright"
 
-### Etape 1C: Verifier le mode multi-agent (teams)
+### Etape 1B: Verifier le mode multi-agent (teams)
 
 Verifier si le mode multi-agent est active dans les settings de Claude Code:
 
@@ -49,7 +54,7 @@ Chercher si la cle `env` contient `"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"`.
 - Si oui: modifier `~/.claude/settings.json` pour ajouter la cle
 - Variable interne: `TEAMS_MODE=true` ou `false`
 
-### Etape 1D: Detecter le mode d'execution
+### Etape 1C: Detecter le mode d'execution
 
 ```bash
 curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" "${URL}/api/settings/exec-mode"

@@ -1,6 +1,7 @@
 ---
 name: exec-db-elevation
 description: Eleve les permissions d'un utilisateur de test dans la base de donnees du projet quand une tache echoue a cause d'une restriction de plan/role. Restaure l'etat original apres le re-test.
+user-invocable: false
 ---
 
 # Execute DB Permission Elevation

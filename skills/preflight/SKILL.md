@@ -1,6 +1,7 @@
 ---
 name: preflight
-description: Verification prealable centralisee pour tous les skills aitestlist-testing. Valide le token API, detecte la langue utilisateur, et resout l'URL du serveur. Doit etre appele en premiere etape par tous les autres skills.
+description: Verification prealable centralisee pour tous les skills aitestlist-testing. Valide le token API, detecte la langue utilisateur, et resout l'URL du serveur. Prechage dans les agents via le champ skills.
+user-invocable: false
 ---
 
 # Preflight
@@ -69,12 +70,8 @@ Apres execution, les variables suivantes sont disponibles pour le skill appelant
 | `AITESTLIST_TOKEN` | `at_xxxx...` | Token API valide |
 | `USER_LANG` | `fr` | Langue de l'utilisateur |
 
-## Usage par les autres skills
+## Usage
 
-Chaque skill du plugin doit commencer par:
-
-```
-Etape 1: Appeler /aitestlist-testing:preflight
-```
-
-Puis utiliser `${URL}` et `${USER_LANG}` dans toutes les requetes suivantes.
+Ce skill est prechage dans les agents via le champ `skills:` dans leur frontmatter.
+Les agents ont les instructions preflight dans leur contexte au demarrage.
+Ils n'ont pas besoin de "l'appeler" — ils executent les etapes directement.

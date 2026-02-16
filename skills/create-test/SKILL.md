@@ -1,16 +1,20 @@
 ---
 name: create-test
 description: Cree et soumet des tests a AI TestList via l'API REST. Genere des taches de test intelligentes avec categories appropriees. Skill core du plugin aitestlist-testing.
+user-invocable: false
 ---
 
 # Create Test
 
 Skill core pour creer et soumettre des tests a AI TestList.
 
-## Prerequis
+## Variables disponibles
 
-Appeler `/aitestlist-testing:preflight` en premiere etape.
-Ce skill fournit: `URL` (serveur), `AITESTLIST_TOKEN` (valide), `USER_LANG` (langue).
+Ce skill est prechage dans l'agent test-creator via le champ `skills:`.
+Les variables suivantes sont disponibles via preflight (egalement prechage):
+- `URL` — URL du serveur AITestList
+- `AITESTLIST_TOKEN` — Token API valide
+- `USER_LANG` — Langue de l'utilisateur (fr/en)
 
 ## API REST
 
@@ -43,13 +47,12 @@ curl -s -X POST "${URL}/api/tests/submit" \
 
 ## Workflow
 
-1. **Preflight** - Appeler `/aitestlist-testing:preflight` (token, langue, URL)
-2. **Obtenir les categories** - Appeler `/api/categories?lang=${USER_LANG}`
-3. **Analyser le contexte** - Comprendre ce qui doit etre teste (lire `.aitestlist/project-analysis.md` si disponible)
-4. **Detecter les specialites** - Si le projet contient des systemes de paiement, appeler aussi `/aitestlist-testing:create-payment` pour generer les tests billing
-5. **Generer les taches** - Creer des taches **DANS LA LANGUE DE L'UTILISATEUR** (`USER_LANG`), PAS la langue de la conversation
-6. **Soumettre** - Appeler `/api/tests/submit`
-7. **Confirmer** - Informer que le test est dans la queue d'import
+1. **Obtenir les categories** - `GET ${URL}/api/categories?lang=${USER_LANG}`
+2. **Analyser le contexte** - Comprendre ce qui doit etre teste (scanner le projet)
+3. **Detecter les specialites** - Si paiement detecte, suivre aussi les instructions create-payment (prechargees dans l'agent)
+4. **Generer les taches** - Creer des taches **DANS LA LANGUE DE L'UTILISATEUR** (`USER_LANG`), PAS la langue de la conversation
+5. **Soumettre** - `POST ${URL}/api/tests/submit`
+6. **Confirmer** - Informer que le test est dans la queue d'import
 
 **IMPORTANT:** Toujours generer dans la langue configuree dans AITestList (`USER_LANG` du preflight), independamment de la langue de la conversation:
 - **Nom du test** - dans la langue de l'utilisateur
