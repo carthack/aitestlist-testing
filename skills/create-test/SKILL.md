@@ -8,6 +8,52 @@ user-invocable: false
 
 Skill core pour creer et soumettre des tests a AI TestList.
 
+## IMPORTANT: Status Output (Live Progress)
+
+**Tu DOIS afficher des messages de status a chaque etape.**
+Ces messages sont visibles en temps reel dans le terminal Claude Code.
+Ils donnent un effet professionnel et montrent la progression au client.
+
+**Format obligatoire — afficher en texte brut (PAS dans un bloc de code):**
+
+**Chargement des categories:**
+```
+📋 Loading test categories (FR)...
+   → 47 categories in 8 groups loaded
+```
+
+**Chargement des projets:**
+```
+📂 Loading projects...
+   → Found 5 projects
+   → Target: "Mon Application" (id: 12)
+```
+
+**Generation des taches — lister CHAQUE tache:**
+```
+🧠 Generating test tasks for "[description]"...
+   → [1/8]  [SETUP] Inscrire un compte de test
+   → [2/8]  Connexion avec identifiants valides
+   → [3/8]  Connexion avec mauvais mot de passe
+   → [4/8]  Connexion avec email inexistant
+   → [5/8]  Connexion avec champs vides
+   → [6/8]  Verifier le lien "Mot de passe oublie"
+   → [7/8]  Verifier la protection CSRF
+   → [8/8]  [TEARDOWN] Nettoyer les donnees de test
+```
+
+**Soumission:**
+```
+📤 Submitting 8 tasks to AITestList...
+   → POST /api/tests/submit
+   → Response: 201 Created
+✅ Test "Test page de connexion" queued for import!
+   → 8 tasks created
+   → Categories: Techniques > Securite > Authentification, Comportementales > Fonctionnalite > Workflow
+   → Import queue: ${URL}/import-queue
+   → Approve the import to create the test
+```
+
 ## Variables disponibles
 
 Ce skill est prechage dans l'agent test-creator via le champ `skills:`.

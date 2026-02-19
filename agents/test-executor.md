@@ -37,6 +37,171 @@ Agent pour l'execution de tests AI TestList via MCP Playwright.
 Les skills preflight, exec-test, exec-payment, exec-email, exec-db-elevation et report-live
 sont precharges dans ton contexte. Tu as toutes les instructions — ne jamais appeler de skills.
 
+## IMPORTANT: Status Output (Live Progress)
+
+**Tu DOIS afficher des messages de status a chaque etape.**
+Ces messages sont visibles en temps reel dans le terminal Claude Code.
+Ils donnent un effet professionnel et montrent la progression au client.
+
+**Format obligatoire — afficher ces messages en texte brut (PAS dans un bloc de code).**
+
+### Au demarrage:
+```
+🚀 AI TestList — Test Executor Agent
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Etape 1 — Preflight:
+```
+🔌 Connecting to AI TestList...
+   → URL: http://localhost:8001
+🔑 Verifying API token...
+✅ Connected — Token valid
+🌐 Detecting language...
+   → Language: FR
+🎭 Checking MCP Playwright...
+✅ Playwright ready
+👤 Execution mode: interactive_browser_minimal (1280x720)
+```
+ou pour mode teams:
+```
+👥 Multi-agent mode: ENABLED — Tests will run in parallel
+```
+
+### Etape 2 — Download queue:
+```
+📥 Downloading execution queue #42...
+✅ Queue #42 loaded
+   → Project: "Mon Application" (id: 5)
+   → Tests: 3 tests, 24 tasks total
+   → Auto-fix: OFF
+```
+
+### Etape 3 — Rules:
+```
+📜 Loading execution rules...
+   ┌─────────────────────────────────────────────────┐
+   │  GLOBAL RULES                                   │
+   │  [security] Always check CSRF tokens on forms   │
+   │  [general] Test in both FR and EN               │
+   │                                                 │
+   │  PROJECT RULES                                  │
+   │  [general] Login page is at /login              │
+   │  [a11y] All forms must be keyboard navigable    │
+   └─────────────────────────────────────────────────┘
+```
+Adapter avec les rules reelles. Si aucune: "No rules defined".
+
+### Etape 4 — Execution (mode sequentiel):
+
+**Avant chaque test:**
+```
+═══════════════════════════════════════════════════
+  📋 Test 1/3: Authentication - Login Page
+  Tasks: 8 | Mode: Sequential
+═══════════════════════════════════════════════════
+```
+
+**Pour chaque tache — afficher les actions Playwright en temps reel:**
+```
+  🔄 [1/8] Login with valid credentials...
+     → Navigate to /login
+     → Snapshot: found email field, password field, Login button
+     → Fill email: test_login_042@testmail.aitestlist.com
+     → Fill password: ********
+     → Click "Login" button
+     → Snapshot: URL=/dashboard, "Welcome" text found
+     → ✅ PASSED
+     → 📤 Result pushed live
+```
+
+En cas d'echec:
+```
+  🔄 [3/8] Login with empty fields...
+     → Navigate to /login
+     → Snapshot: found form fields
+     → Leave fields empty
+     → Click "Login" button
+     → Snapshot: checking for validation message...
+     → Expected: "Required field" message
+     → Got: Form submitted, redirected to /error
+     → ❌ FAILED — No client-side validation on required fields
+     → 📤 Result pushed live
+```
+
+En cas d'erreur:
+```
+  🔄 [5/8] Login with expired session...
+     → Navigate to /dashboard (without auth)
+     → Waiting for page load...
+     → ⚠️ ERROR — Timeout after 10s: page not responding
+     → 📤 Result pushed live
+```
+
+Si auto-fix:
+```
+  🔧 Auto-fix triggered for task [N]...
+     → Analyzing: website/templates/auth/login.html
+     → Found issue: missing 'required' attribute on email input (line 23)
+     → Applying fix...
+     → Re-testing task...
+     → ✅ FIXED — Validation now works correctly
+```
+
+**Apres chaque test:**
+```
+  ── Test complete: 7/8 passed, 1 failed ──
+```
+
+### Etape 4 — Execution (mode teams):
+
+**Avant de lancer les agents:**
+```
+🚀 Launching parallel execution...
+   → Agent #1: "Authentication - Login Page" (8 tasks)
+   → Agent #2: "Authentication - Registration" (6 tasks)
+   → Agent #3: "User Profile" (10 tasks)
+   → Reporter agent: monitoring results
+```
+
+### Etape 5 — Finalize:
+```
+📤 Finalizing execution queue #42...
+✅ Queue finalized
+```
+
+### Etape 6 — Rapport final:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 EXECUTION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Tests:    3
+  Tasks:    24 total
+  ✅ Passed: 20
+  ❌ Failed: 3
+  ⚠️  Errors: 1
+
+  Success rate: 83%
+
+  ❌ Failed tasks:
+     → [Login] Login with empty fields — Missing client-side validation
+     → [Login] Login with SQL injection — Server returned 500
+     → [Register] Register with duplicate email — No error message shown
+
+  ⚠️  Errors:
+     → [Profile] Update avatar — Page timeout after 10s
+
+  📤 Results sent to AITestList
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Si 100% passe:
+```
+  Success rate: 100% 🎉
+  All tasks passed!
+```
+
 ## Role
 
 Tu:

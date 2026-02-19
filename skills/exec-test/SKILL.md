@@ -8,6 +8,139 @@ user-invocable: false
 
 Skill core pour executer les tests AI TestList via MCP Playwright.
 
+## IMPORTANT: Status Output (Live Progress)
+
+**Tu DOIS afficher des messages de status a chaque etape.**
+Ces messages sont visibles en temps reel dans le terminal Claude Code.
+Ils donnent un effet professionnel et montrent la progression au client.
+
+**Format obligatoire — afficher en texte brut (PAS dans un bloc de code).**
+
+**Verification MCP Playwright:**
+```
+🎭 Checking MCP Playwright...
+✅ Playwright ready
+```
+
+**Mode d'execution:**
+```
+👤 Execution mode: interactive_browser_minimal (1280x720)
+```
+
+**Download queue:**
+```
+📥 Downloading execution queue #42...
+✅ Queue #42 loaded
+   → Project: "Mon Application" (id: 5)
+   → Tests: 3 tests, 24 tasks total
+   → Auto-fix: OFF
+```
+
+**Rules:**
+```
+📜 Loading execution rules...
+   ┌─────────────────────────────────────────────────┐
+   │  GLOBAL RULES                                   │
+   │  [security] Always check CSRF tokens on forms   │
+   │  [general] Test in both FR and EN               │
+   │                                                 │
+   │  PROJECT RULES                                  │
+   │  [general] Login page is at /login              │
+   │  [a11y] All forms must be keyboard navigable    │
+   └─────────────────────────────────────────────────┘
+```
+
+**Avant chaque test:**
+```
+═══════════════════════════════════════════════════
+  📋 Test 1/3: Authentication - Login Page
+  Tasks: 8
+═══════════════════════════════════════════════════
+```
+
+**Pour chaque tache — afficher les actions Playwright en temps reel:**
+```
+  🔄 [1/8] Login with valid credentials...
+     → Creating test email: POST /api/email-testing/aliases
+     → Got: test_login_042@testmail.aitestlist.com
+     → Navigate to /login
+     → Snapshot: found email field, password field, Login button
+     → Fill email: test_login_042@testmail.aitestlist.com
+     → Fill password: ********
+     → Click "Login" button
+     → Snapshot: URL=/dashboard, "Welcome" text found
+     → ✅ PASSED
+     → 📤 Result pushed live
+```
+
+En cas d'echec:
+```
+  🔄 [3/8] Login with empty fields...
+     → Navigate to /login
+     → Snapshot: found form fields
+     → Leave fields empty
+     → Click "Login" button
+     → Expected: "Required field" message
+     → Got: Form submitted without validation
+     → ❌ FAILED — No client-side validation
+     → 📤 Result pushed live
+```
+
+En cas d'erreur:
+```
+  🔄 [5/8] Login with expired session...
+     → Navigate to /dashboard
+     → ⚠️ ERROR — Timeout after 10s
+     → 📤 Result pushed live
+```
+
+Auto-fix:
+```
+  🔧 Auto-fix triggered for task [N]...
+     → Analyzing: website/templates/auth/login.html
+     → Found: missing 'required' on email input (line 23)
+     → Applying fix...
+     → Re-testing...
+     → ✅ FIXED — Validation now works
+```
+
+**Apres chaque test:**
+```
+  ── Test complete: 7/8 passed, 1 failed ──
+```
+
+**Finalize:**
+```
+📤 Finalizing execution queue #42...
+✅ Queue finalized
+```
+
+**Rapport final:**
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 EXECUTION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Tests:    3
+  Tasks:    24 total
+  ✅ Passed: 20
+  ❌ Failed: 3
+  ⚠️  Errors: 1
+
+  Success rate: 83%
+
+  ❌ Failed tasks:
+     → [Login] Login with empty fields — Missing validation
+     → [Login] SQL injection — Server returned 500
+     → [Register] Duplicate email — No error message
+
+  ⚠️  Errors:
+     → [Profile] Update avatar — Timeout after 10s
+
+  📤 Results sent to AITestList
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 ## Variables disponibles
 
 Ce skill est prechage dans l'agent test-executor via le champ `skills:`.
