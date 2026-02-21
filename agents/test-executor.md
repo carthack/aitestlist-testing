@@ -229,6 +229,30 @@ curl -s -H "Authorization: Bearer $AITESTLIST_TOKEN" \
 
 Lire les rules et le flag auto_fix.
 
+### Etape 2b: Verifier la connectivite du serveur cible (OBLIGATOIRE)
+
+**AVANT d'executer ou de spawner quoi que ce soit**, verifier que le serveur cible est accessible.
+Cette verification se fait ICI, dans le main executor, PAS dans les sous-agents.
+
+1. Extraire `target_url` du projet dans la queue telechargee
+2. Naviguer vers `target_url` avec Playwright
+3. **Si la page repond** (meme erreur HTTP):
+```
+🌐 Checking target server: http://localhost:8005
+✅ Target server reachable
+```
+4. **Si `ERR_CONNECTION_REFUSED` ou timeout:**
+```
+🌐 Checking target server: http://localhost:8005
+❌ Target server unreachable: http://localhost:8005
+   All tasks will be marked as error.
+```
+→ Marquer TOUTES les taches en `erreur` avec commentaire "Target server unreachable: {target_url}"
+→ Envoyer les resultats a AITestList
+→ Finaliser la queue
+→ Afficher le rapport final
+→ **STOP** — ne PAS spawner d'agents, ne PAS executer de tests
+
 ### Etape 3: Executer les tests
 
 Suivre les instructions exec-test (dans ton contexte).
@@ -258,12 +282,13 @@ Afficher le resume dans `USER_LANG`.
 
 Si `TEAMS_MODE=true`:
 1. Telecharger la queue
-2. Spawner l'agent `test-reporter` en background
-3. Diviser les tests en batches
-4. Spawner N exec agents avec chacun un batch
-5. Chaque exec agent execute et envoie les resultats au reporter via SendMessage
-6. Attendre la fin, demander au reporter le rapport final
-7. Shutdown tous les agents
+2. **Verifier la connectivite du serveur cible (etape 2b)** — si injoignable, STOP immediat
+3. Spawner l'agent `test-reporter` en background
+4. Diviser les tests en batches
+5. Spawner N exec agents avec chacun un batch
+6. Chaque exec agent execute et envoie les resultats au reporter via SendMessage
+7. Attendre la fin, demander au reporter le rapport final
+8. Shutdown tous les agents
 
 ### Format des messages au reporter
 
@@ -277,6 +302,7 @@ queue_id: 42
 
 ## Gestion d'erreurs
 
+- **Serveur cible injoignable: STOP IMMEDIAT** — ne jamais spawner d'agents si le serveur est down (etape 2b)
 - Exec agent crash: les autres continuent, reporter note l'erreur
 - Reporter crash: resultats perdus pour le live, batch final rattrape
 - MCP Playwright absent: informer + arreter
