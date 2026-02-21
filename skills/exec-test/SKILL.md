@@ -220,6 +220,24 @@ Avant d'executer chaque tache, verifier si elle necessite des instructions speci
 | Description contient `[CREATE_TEST_EMAIL:...]` | exec-email | Cree alias, attend email, extrait liens |
 | Tache echoue par restriction plan/role | exec-db-elevation | Eleve permissions BD, re-teste, restaure |
 
+## Etape 3c: Verifier la connectivite du serveur cible
+
+Avant d'executer les tests, verifier que le serveur cible (`target_url` du projet) est accessible.
+
+1. Naviguer vers `target_url` avec Playwright
+2. **Si la page repond** (meme avec une erreur HTTP comme 404):
+```
+🌐 Checking target server: http://localhost:8005
+✅ Target server reachable
+```
+3. **Si `ERR_CONNECTION_REFUSED` ou timeout:**
+```
+🌐 Checking target server: http://localhost:8005
+❌ Target server unreachable: http://localhost:8005
+   All tasks will be marked as error.
+```
+→ Marquer toutes les taches en `erreur`, envoyer les resultats, afficher le rapport, **STOP**.
+
 ## Etape 4: Executer les tests via MCP Playwright
 
 Pour chaque test:
@@ -299,14 +317,42 @@ Taux de reussite: 89%
 Resultats envoyes a AITestList.
 ```
 
+**IMPORTANT:** Le rapport ci-dessus est la DERNIERE chose affichee. Ne JAMAIS ajouter
+de texte supplementaire apres le rapport (pas de liste de ✅, pas de resume additionnel).
+Le rapport EST le resume final.
+
 ## Gestion d'erreurs
 
-- MCP Playwright pas configure → informer + commande d'installation
-- Token invalide → "Generez-en un dans Settings > Integration."
-- File pas trouvee → "File #ID non trouvee."
-- File pas approuvee → "Approuvez-la dans AITestList."
-- Erreur Playwright → marquer la tache comme "erreur", continuer a la suivante
-- API AITestList down → informer l'utilisateur, arreter l'execution
+### Erreurs fatales — ARRET IMMEDIAT
+
+Ces erreurs arretent TOUTE l'execution. Ne JAMAIS continuer apres une erreur fatale.
+Ne JAMAIS tenter de contourner le probleme (ex: chercher un autre token, deviner une URL).
+
+- **MCP Playwright pas configure** → Afficher ❌ + "Ajoutez-le avec: /mcp add playwright" → **STOP**
+- **Token invalide/revoque** → Afficher ❌ + "Token invalide. Generez-en un dans Settings > Integration." → **STOP**
+- **API AITestList down** → Afficher ❌ + "Serveur AITestList injoignable" → **STOP**
+- **File pas trouvee** → Afficher ❌ + "File #ID non trouvee." → **STOP**
+- **File pas approuvee** → Afficher ❌ + "Approuvez-la dans AITestList." → **STOP**
+- **Serveur cible injoignable** (voir ci-dessous) → **STOP**
+
+### Serveur cible injoignable — Detection et arret
+
+Apres le telechargement de la queue (etape 2), AVANT d'executer les tests:
+1. Tenter une navigation vers `target_url` avec Playwright
+2. Si `ERR_CONNECTION_REFUSED` ou timeout:
+   a. Afficher: `❌ Target server unreachable: {target_url}`
+   b. Marquer TOUTES les taches comme `erreur` avec commentaire "Target server unreachable: {target_url}"
+   c. Envoyer les resultats a AITestList (toutes les taches en erreur)
+   d. Afficher le rapport final
+   e. **STOP** — ne pas essayer chaque tache individuellement
+
+### Erreurs de tache — Continuer l'execution
+
+Ces erreurs concernent une tache individuelle. On marque la tache en erreur et on continue.
+
+- Element non trouve dans le snapshot → `erreur` + description
+- Timeout sur une action specifique (click, fill) → `erreur` + description
+- Erreur JavaScript dans la page → `erreur` + description
 
 ## Regle auto-fix
 
