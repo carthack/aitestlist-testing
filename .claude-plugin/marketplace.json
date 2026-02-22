@@ -13,7 +13,10 @@
     {
       "name": "aitestlist-testing",
       "description": "Create, execute, and report QA tests via Claude Code with AI TestList",
-      "source": "./"
+      "source": {
+        "source": "github",
+        "repo": "carthack/aitestlist-testing"
+      }
     }
   ]
 }
