@@ -53,27 +53,45 @@ curl -s -X POST "${URL}/api/reports/error-analysis" \
 
 1. **Lister les projets** - `GET ${URL}/api/projects` et laisser l'utilisateur choisir (ou recevoir le project_id du caller)
 2. **Recuperer les taches echouees** - `GET ${URL}/api/projects/{id}/failed-tasks`
-3. **Analyser chaque tache** - Pour chaque tache echouee, analyser en profondeur
+3. **Analyser TOUTES les taches en un seul bloc** - Voir section "Analyse batch" ci-dessous
 4. **Envoyer les diagnostics** - `POST ${URL}/api/reports/error-analysis`
 5. **Confirmer** - Informer l'utilisateur que le rapport est disponible
 
-## Analyse des taches echouees
+## IMPORTANT: Analyse batch (pas une par une!)
 
-Pour chaque tache echouee, produire un diagnostic structure:
+**PERFORMANCE CRITIQUE** — Analyser toutes les taches echouees en UN SEUL passage.
 
-### Champs du diagnostic
+**NE PAS FAIRE:** Boucler sur chaque tache individuellement avec un prompt par tache.
+Cela genere N appels API et prend 30+ minutes pour 30 taches.
+
+**FAIRE:** Lire toutes les taches echouees retournees par l'API, puis produire
+tous les diagnostics dans une seule reponse. Le JSON de diagnostics complet
+doit etre construit en un seul bloc puis envoye avec un seul POST.
+
+### Etapes concretes:
+
+1. `GET /api/projects/{id}/failed-tasks` → recevoir la liste complete
+2. Lire TOUTES les taches d'un coup (elles sont dans la reponse JSON)
+3. Produire le JSON `diagnoses` complet avec tous les task_id en UNE SEULE reponse
+4. `POST /api/reports/error-analysis` avec le JSON complet → UN SEUL appel
+
+Total: 2 appels API (1 GET + 1 POST). Pas de boucle.
+
+## Champs du diagnostic (par tache)
 
 - **error**: Description concise de l'erreur probable (1-2 phrases)
 - **cause**: Explication de la cause racine (2-3 phrases)
 - **solutions**: Liste de 3 solutions ordonnees par priorite
 
-### Methodologie d'analyse
+## Methodologie d'analyse
 
+Pour chaque tache dans le batch:
 1. **Lire la description** - Comprendre les preconditions, les etapes et le resultat attendu
 2. **Analyser le commentaire** - Le testeur a souvent laisse des indices
 3. **Considerer la categorie** - Un echec en securite n'a pas les memes causes qu'en UI
 4. **Etre specifique** - Eviter les diagnostics generiques comme "verifier le code"
 5. **Proposer des solutions actionnables** - Chaque solution doit etre assez precise pour etre implementee
+6. **Regrouper les erreurs similaires** - Si plusieurs taches echouent pour la meme raison, le mentionner
 
 ### Exemple de bon diagnostic
 
@@ -111,6 +129,8 @@ Quand appele par l'agent `test-reporter` apres une execution:
 - Le project_id est fourni automatiquement
 - Pas besoin de demander a l'utilisateur de choisir
 - Le rapport est genere et envoye sans interaction
+- En mode teams, le reporter a deja les taches echouees en memoire — utiliser
+  `GET /failed-tasks` pour avoir le format complet si necessaire
 
 ## Apres envoi
 
