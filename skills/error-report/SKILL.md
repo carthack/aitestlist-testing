@@ -90,8 +90,13 @@ Total: 2 appels API (1 GET + 1 POST). Pas de boucle.
 
 - **error**: Description concise de l'erreur probable (1-2 phrases)
 - **cause**: Explication de la cause racine (2-3 phrases)
-- **solution**: LA meilleure solution en une phrase claire
-- **steps**: Liste de 1 a 5 etapes concretes pour implementer la solution
+- **solution**: LA meilleure solution en une phrase claire (resume de haut niveau, PAS la meme chose que step 1)
+- **steps**: Etapes concretes pour implementer la solution. IMPORTANT sur le nombre d'etapes:
+  - Bug simple (1 import manquant, 1 config) → 1 etape
+  - Correction moderee (2 fichiers a modifier) → 2 etapes
+  - Correction complexe (architecture, multi-fichiers) → 3-4 etapes
+  - Refactoring majeur → 5 etapes max
+  - **NE PAS toujours mettre 3 etapes.** Varier selon la complexite reelle du probleme.
 
 ## Methodologie d'analyse
 
