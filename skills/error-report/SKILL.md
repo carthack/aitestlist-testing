@@ -39,6 +39,10 @@ curl -s -X POST "${URL}/api/reports/error-analysis" \
   -H "Content-Type: application/json" \
   -d '{
     "project_id": 9,
+    "task_index": {
+      "123": "Page d accueil du portail affilies",
+      "456": "Validation formulaire inscription"
+    },
     "diagnoses": {
       "123": {
         "error": "Description courte de l erreur probable",
@@ -48,6 +52,10 @@ curl -s -X POST "${URL}/api/reports/error-analysis" \
     }
   }'
 ```
+
+**IMPORTANT**: `task_index` est un dictionnaire `{task_id: task_title}` pour toutes les taches
+echouees. Il est utilise pour generer un lexique dans le rapport PDF.
+Construire le task_index a partir des champs `task_id` et `title` retournes par `GET /failed-tasks`.
 
 ## Workflow
 
