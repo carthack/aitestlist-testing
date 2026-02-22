@@ -256,7 +256,54 @@ Pour chaque test:
       3. Re-tester la meme tache
       4. Si passe: mettre a jour le resultat, ajouter "Fixed: [description]"
       5. Si echoue encore: garder echec, ajouter "Fix attempted but failed"
+   i. **Verification post-action (si auto_fix_enabled):**
+      Apres toute tache qui modifie l'etat du systeme (INSERT BD, creation de compte,
+      modification de code, auto-fix), verifier que les pages affectees ne crashent pas.
+      Voir section "Verification post-action" ci-dessous.
 3. Passer au test suivant
+
+### Verification post-action (max 3 tentatives)
+
+**Quand:** Apres toute tache qui modifie l'etat du systeme, SI `auto_fix_enabled` est `true`.
+
+**Taches concernees:**
+- Taches `[SETUP]` (creation de comptes, projets, donnees de test via BD)
+- Taches ou un auto-fix a ete applique (modification de code ou de BD)
+- Taches qui inserent/modifient des donnees directement en BD
+
+**Procedure:**
+1. Identifier les pages affectees par l'action (ex: si INSERT dans `projects` → `/projects`)
+2. Naviguer vers chaque page affectee avec Playwright
+3. Prendre un snapshot et verifier qu'il n'y a pas d'erreur (500, UndefinedError, crash)
+4. **Si la page crashe:**
+   - Analyser l'erreur (ex: champ NULL, attribut manquant)
+   - Corriger la donnee ou le code source
+   - Re-verifier la page
+   - **Maximum 3 tentatives** par page. Apres 3 echecs, logger un warning et continuer.
+
+**Affichage:**
+```
+  🔍 Post-action check: /projects
+     → Snapshot: page OK
+```
+
+En cas de correction:
+```
+  🔍 Post-action check: /projects
+     → ❌ Page error: UndefinedError 'None' has no attribute 'strftime'
+     → Fix attempt 1/3: UPDATE projects SET date_creation=CURDATE() WHERE id=15
+     → Re-check: /projects
+     → ✅ Page OK after fix
+```
+
+En cas d'echec apres 3 tentatives:
+```
+  🔍 Post-action check: /projects
+     → ❌ Page error after 3 attempts — continuing execution
+```
+
+**IMPORTANT:** Cette verification ne change PAS le statut de la tache en cours.
+Elle sert uniquement a detecter et corriger les effets de bord avant de continuer.
 
 ### Outils MCP Playwright
 
@@ -360,3 +407,5 @@ Ces erreurs concernent une tache individuelle. On marque la tache en erreur et o
 - Toujours reporter le probleme AVANT de tenter un fix
 - Toujours re-tester apres un fix
 - Documenter le fix dans le commentaire de la tache
+- Apres toute modification (BD ou code), effectuer la verification post-action (max 3 tentatives)
+- Les verifications post-action ne changent pas le statut de la tache

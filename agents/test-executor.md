@@ -148,6 +148,19 @@ Si auto-fix:
      → ✅ FIXED — Validation now works correctly
 ```
 
+Verification post-action (apres SETUP ou auto-fix):
+```
+  🔍 Post-action check: /projects
+     → Snapshot: page OK
+```
+ou si correction necessaire:
+```
+  🔍 Post-action check: /projects
+     → ❌ Page error: UndefinedError
+     → Fix attempt 1/3: UPDATE projects SET date_creation=CURDATE()...
+     → Re-check: page OK after fix
+```
+
 **Apres chaque test:**
 ```
   ── Test complete: 7/8 passed, 1 failed ──
