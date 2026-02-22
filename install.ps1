@@ -3,60 +3,46 @@
 
 $ErrorActionPreference = "Stop"
 
+$MarketplaceRepo = "carthack/aitestlist-testing"
 $PluginName = "aitestlist-testing"
-$RepoUrl = "https://github.com/carthack/aitestlist-testing.git"
-$Version = "1.0.0"
-$PluginDir = "$env:USERPROFILE\.claude\plugins\cache\aitestlist\$PluginName\$Version"
-$InstalledFile = "$env:USERPROFILE\.claude\plugins\installed_plugins.json"
+$KnownMarketplaces = "$env:USERPROFILE\.claude\plugins\known_marketplaces.json"
 
 Write-Host "=== AI TestList Testing Plugin Installer ===" -ForegroundColor Cyan
 Write-Host ""
 
-# Check git
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Host "Error: git is required. Install it first." -ForegroundColor Red
+# Check claude CLI
+if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+    Write-Host "Error: Claude Code CLI is required." -ForegroundColor Red
+    Write-Host "Install it from: https://claude.ai/download"
     exit 1
 }
 
-# Remove old installation if exists
-if (Test-Path $PluginDir) {
-    Write-Host "Removing previous installation..."
-    Remove-Item -Recurse -Force $PluginDir
-}
+# Step 1: Add marketplace
+Write-Host "Adding marketplace..."
+try { claude plugin marketplace add $MarketplaceRepo 2>$null } catch {}
 
-# Clone
-Write-Host "Installing $PluginName v$Version..."
-$ParentDir = Split-Path $PluginDir -Parent
-New-Item -ItemType Directory -Force -Path $ParentDir | Out-Null
-git clone --depth 1 $RepoUrl $PluginDir 2>$null
-Remove-Item -Recurse -Force "$PluginDir\.git" -ErrorAction SilentlyContinue
+# Step 2: Install plugin
+Write-Host "Installing plugin..."
+try { claude plugin install $PluginName 2>$null } catch {}
 
-# Register in installed_plugins.json
-$PluginsDir = Split-Path $InstalledFile -Parent
-if (-not (Test-Path $PluginsDir)) {
-    New-Item -ItemType Directory -Force -Path $PluginsDir | Out-Null
-}
-if (-not (Test-Path $InstalledFile)) {
-    "[]" | Set-Content $InstalledFile
-}
-
-$plugins = Get-Content $InstalledFile | ConvertFrom-Json
-$existing = $plugins | Where-Object { $_.name -eq $PluginName }
-if (-not $existing) {
-    $entry = @{
-        name = $PluginName
-        version = $Version
-        path = $PluginDir
-        source = "github"
+# Step 3: Enable auto-update in known_marketplaces.json
+if (Test-Path $KnownMarketplaces) {
+    Write-Host "Enabling auto-update..."
+    try {
+        $data = Get-Content $KnownMarketplaces -Raw | ConvertFrom-Json
+        if ($data.aitestlist) {
+            $data.aitestlist | Add-Member -NotePropertyName "autoUpdate" -NotePropertyValue $true -Force
+            $data | ConvertTo-Json -Depth 10 | Set-Content $KnownMarketplaces -Encoding UTF8
+            Write-Host "Auto-update enabled."
+        } else {
+            Write-Host "Warning: aitestlist marketplace not found in known_marketplaces.json" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "Note: Could not enable auto-update. Enable manually via /plugin > Marketplaces." -ForegroundColor Yellow
     }
-    $plugins += $entry
-    $plugins | ConvertTo-Json -Depth 10 | Set-Content $InstalledFile
-    Write-Host "Plugin registered."
-} else {
-    Write-Host "Plugin already registered."
 }
 
-# Clean up old standalone files
+# Step 4: Clean up old standalone files (pre-plugin era)
 Write-Host ""
 Write-Host "Cleaning up old standalone files..."
 $OldFiles = @(
@@ -75,11 +61,11 @@ foreach ($f in $OldFiles) {
 
 Write-Host ""
 Write-Host "=== Installation complete ===" -ForegroundColor Green
-Write-Host "Plugin: $PluginName v$Version"
-Write-Host "Location: $PluginDir"
+Write-Host "Auto-update: enabled (new versions install automatically)"
 Write-Host ""
-Write-Host "Available commands:"
-Write-Host "  /aitestlist-testing:create  - Create QA tests"
-Write-Host "  /aitestlist-testing:exec    - Execute test queue"
-Write-Host "  /aitestlist-testing:report  - Generate error report"
-Write-Host "  /aitestlist-testing:status  - Check connection status"
+Write-Host "Restart Claude Code to activate the plugin."
+Write-Host ""
+Write-Host "Available skills:"
+Write-Host "  @test-creator   - Create QA tests"
+Write-Host "  @test-executor  - Execute test queue"
+Write-Host "  @test-reporter  - Generate error report"

@@ -4,62 +4,47 @@
 
 set -e
 
+MARKETPLACE_REPO="carthack/aitestlist-testing"
 PLUGIN_NAME="aitestlist-testing"
-REPO_URL="https://github.com/carthack/aitestlist-testing.git"
-VERSION="1.0.0"
-PLUGIN_DIR="$HOME/.claude/plugins/cache/aitestlist/$PLUGIN_NAME/$VERSION"
-INSTALLED_FILE="$HOME/.claude/plugins/installed_plugins.json"
+KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
 
 echo "=== AI TestList Testing Plugin Installer ==="
 echo ""
 
-# Check git
-if ! command -v git &> /dev/null; then
-    echo "Error: git is required. Install it first."
+# Check claude CLI
+if ! command -v claude &> /dev/null; then
+    echo "Error: Claude Code CLI is required."
+    echo "Install it from: https://claude.ai/download"
     exit 1
 fi
 
-# Remove old installation if exists
-if [ -d "$PLUGIN_DIR" ]; then
-    echo "Removing previous installation..."
-    rm -rf "$PLUGIN_DIR"
-fi
+# Step 1: Add marketplace
+echo "Adding marketplace..."
+claude plugin marketplace add "$MARKETPLACE_REPO" 2>/dev/null || true
 
-# Clone
-echo "Installing $PLUGIN_NAME v$VERSION..."
-mkdir -p "$(dirname "$PLUGIN_DIR")"
-git clone --depth 1 "$REPO_URL" "$PLUGIN_DIR" 2>/dev/null
-rm -rf "$PLUGIN_DIR/.git"
+# Step 2: Install plugin
+echo "Installing plugin..."
+claude plugin install "$PLUGIN_NAME" 2>/dev/null || true
 
-# Register in installed_plugins.json
-mkdir -p "$(dirname "$INSTALLED_FILE")"
-if [ ! -f "$INSTALLED_FILE" ]; then
-    echo '[]' > "$INSTALLED_FILE"
-fi
-
-# Check if already registered
-if grep -q "\"$PLUGIN_NAME\"" "$INSTALLED_FILE" 2>/dev/null; then
-    echo "Plugin already registered."
-else
-    # Add entry (simple append without jq dependency)
+# Step 3: Enable auto-update in known_marketplaces.json
+if [ -f "$KNOWN_MARKETPLACES" ]; then
+    echo "Enabling auto-update..."
     python3 -c "
-import json, sys
-path = '$INSTALLED_FILE'
+import json
+path = '$KNOWN_MARKETPLACES'
 with open(path) as f:
-    plugins = json.load(f)
-plugins.append({
-    'name': '$PLUGIN_NAME',
-    'version': '$VERSION',
-    'path': '$PLUGIN_DIR',
-    'source': 'github'
-})
-with open(path, 'w') as f:
-    json.dump(plugins, f, indent=2)
-print('Plugin registered.')
-" 2>/dev/null || echo "Note: Could not auto-register. Add manually to $INSTALLED_FILE"
+    data = json.load(f)
+if 'aitestlist' in data:
+    data['aitestlist']['autoUpdate'] = True
+    with open(path, 'w') as f:
+        json.dump(data, f, indent=2)
+    print('Auto-update enabled.')
+else:
+    print('Warning: aitestlist marketplace not found in known_marketplaces.json')
+" 2>/dev/null || echo "Note: Could not enable auto-update. Enable manually via /plugin > Marketplaces."
 fi
 
-# Clean up old standalone files
+# Step 4: Clean up old standalone files (pre-plugin era)
 echo ""
 echo "Cleaning up old standalone files..."
 OLD_FILES=(
@@ -78,11 +63,11 @@ done
 
 echo ""
 echo "=== Installation complete ==="
-echo "Plugin: $PLUGIN_NAME v$VERSION"
-echo "Location: $PLUGIN_DIR"
+echo "Auto-update: enabled (new versions install automatically)"
 echo ""
-echo "Available commands:"
-echo "  /aitestlist-testing:create  - Create QA tests"
-echo "  /aitestlist-testing:exec    - Execute test queue"
-echo "  /aitestlist-testing:report  - Generate error report"
-echo "  /aitestlist-testing:status  - Check connection status"
+echo "Restart Claude Code to activate the plugin."
+echo ""
+echo "Available skills:"
+echo "  @test-creator   - Create QA tests"
+echo "  @test-executor  - Execute test queue"
+echo "  @test-reporter  - Generate error report"
