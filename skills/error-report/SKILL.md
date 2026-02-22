@@ -89,7 +89,7 @@ Total: 2 appels API (1 GET + 1 POST). Pas de boucle.
 
 - **error**: Description concise de l'erreur probable (1-2 phrases)
 - **cause**: Explication de la cause racine (2-3 phrases)
-- **solutions**: Liste de 3 solutions ordonnees par priorite
+- **solutions**: Liste de solutions ordonnees par priorite (1 a 5 selon la complexite du probleme — pas toujours 3)
 
 ## Methodologie d'analyse
 
