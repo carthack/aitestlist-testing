@@ -100,6 +100,7 @@ Pour chaque tache dans le batch:
 4. **Etre specifique** - Eviter les diagnostics generiques comme "verifier le code"
 5. **Proposer des solutions actionnables** - Chaque solution doit etre assez precise pour etre implementee
 6. **Regrouper les erreurs similaires** - Si plusieurs taches echouent pour la meme raison, le mentionner
+7. **Utiliser les IDs numeriques** - Dans les textes de diagnostic, referencer les taches par leur ID (ex: "resout taches 1973, 1989") plutot que par leur titre complet. Le lexique task_index en fin de rapport fournit la correspondance ID → titre
 
 ### Exemple de bon diagnostic
 
