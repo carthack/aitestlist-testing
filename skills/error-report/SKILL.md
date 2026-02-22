@@ -47,7 +47,8 @@ curl -s -X POST "${URL}/api/reports/error-analysis" \
       "123": {
         "error": "Description courte de l erreur probable",
         "cause": "Explication de la cause racine",
-        "solutions": ["Solution 1", "Solution 2", "Solution 3"]
+        "solution": "La meilleure solution en une phrase",
+        "steps": ["Etape 1", "Etape 2"]
       }
     }
   }'
@@ -89,7 +90,8 @@ Total: 2 appels API (1 GET + 1 POST). Pas de boucle.
 
 - **error**: Description concise de l'erreur probable (1-2 phrases)
 - **cause**: Explication de la cause racine (2-3 phrases)
-- **solutions**: Liste de solutions ordonnees par priorite (1 a 5 selon la complexite du probleme — pas toujours 3)
+- **solution**: LA meilleure solution en une phrase claire
+- **steps**: Liste de 1 a 5 etapes concretes pour implementer la solution
 
 ## Methodologie d'analyse
 
@@ -98,7 +100,7 @@ Pour chaque tache dans le batch:
 2. **Analyser le commentaire** - Le testeur a souvent laisse des indices
 3. **Considerer la categorie** - Un echec en securite n'a pas les memes causes qu'en UI
 4. **Etre specifique** - Eviter les diagnostics generiques comme "verifier le code"
-5. **Proposer des solutions actionnables** - Chaque solution doit etre assez precise pour etre implementee
+5. **Proposer UNE solution actionnable** - La meilleure, avec des etapes concretes pour l'implementer
 6. **Regrouper les erreurs similaires** - Si plusieurs taches echouent pour la meme raison, le mentionner
 7. **Utiliser les IDs numeriques** - Dans les textes de diagnostic, referencer les taches par leur ID (ex: "resout taches 1973, 1989") plutot que par leur titre complet. Le lexique task_index en fin de rapport fournit la correspondance ID → titre
 
@@ -108,10 +110,11 @@ Pour chaque tache dans le batch:
 {
   "error": "Le formulaire de login accepte des identifiants vides - la validation cote client est contournee quand JavaScript est desactive",
   "cause": "La validation est uniquement cote client (JavaScript). Il n'y a pas de validation cote serveur dans le controleur /auth/login.",
-  "solutions": [
-    "Ajouter une validation required sur les champs email et password dans le formulaire WTForms",
-    "Ajouter une verification explicite dans la route /auth/login",
-    "Implementer un middleware de validation globale"
+  "solution": "Ajouter une validation serveur dans le formulaire WTForms et la route Flask",
+  "steps": [
+    "Ouvrir website/codeDir/forms/auth.py",
+    "Ajouter DataRequired() sur les champs email et password du LoginForm",
+    "Dans la route /auth/login, verifier form.validate_on_submit() avant traitement"
   ]
 }
 ```
@@ -122,7 +125,8 @@ Pour chaque tache dans le batch:
 {
   "error": "Le test a echoue",
   "cause": "Il y a un bug dans le code",
-  "solutions": ["Corriger le bug", "Ajouter des tests", "Verifier le code"]
+  "solution": "Corriger le bug",
+  "steps": ["Verifier le code"]
 }
 ```
 
