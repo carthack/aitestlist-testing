@@ -1,6 +1,6 @@
 ---
 name: create-test
-description: Cree et soumet des tests a AI TestList via l'API REST. Genere des taches de test intelligentes avec categories appropriees. Skill core du plugin aitestlist-testing.
+description: Cree et soumet des tests a AI TestList via l'API REST. Genere des taches de test intelligentes avec categories appropriees. Skill core du plugin aitestlist-plugin.
 user-invocable: false
 ---
 

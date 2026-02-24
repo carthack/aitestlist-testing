@@ -1,4 +1,4 @@
-# aitestlist-testing - Architecture et Documentation
+# aitestlist-plugin - Architecture et Documentation
 
 > Plugin Claude Code pour creer, executer et reporter des tests QA via AI TestList.
 > Version: 1.1.0 | Auteur: 9524-2426 Quebec Inc.
@@ -20,7 +20,7 @@
 
 ## Vue d'ensemble
 
-Le plugin `aitestlist-testing` connecte Claude Code a la plateforme AI TestList.
+Le plugin `aitestlist-plugin` connecte Claude Code a la plateforme AI TestList.
 Il permet de:
 
 - **Creer** des tests QA intelligents a partir de l'analyse d'un projet
@@ -57,7 +57,7 @@ API REST AITestList ($AITESTLIST_URL)
 ## Structure du plugin
 
 ```
-aitestlist-testing/
+aitestlist-plugin/
 |
 |-- .claude-plugin/
 |   |-- plugin.json              # Metadata du plugin (nom, version, auteur)
@@ -142,7 +142,7 @@ skills:
 | `@test-creator` | Agent | Opus | Analyser un projet et creer des tests QA |
 | `@test-executor` | Agent | Opus | Executer une queue de tests via Playwright |
 | `@test-reporter` | Agent | Sonnet | Generer un rapport d'erreurs PDF |
-| `/aitestlist-testing:status` | Skill | - | Diagnostic connexion et configuration |
+| `/aitestlist-plugin:status` | Skill | - | Diagnostic connexion et configuration |
 
 Tous les autres skills sont `user-invocable: false` et ne sont pas visibles dans le menu `/`.
 
@@ -281,10 +281,10 @@ Utilisateur: @test-reporter genere un rapport pour le projet X
     | 6. Confirmer la disponibilite du rapport
 ```
 
-### Flow 4: Diagnostic (`/aitestlist-testing:status`)
+### Flow 4: Diagnostic (`/aitestlist-plugin:status`)
 
 ```
-Utilisateur: /aitestlist-testing:status
+Utilisateur: /aitestlist-plugin:status
     |
     v
 [skill status] (seul skill user-invocable)
@@ -575,13 +575,13 @@ Configure dans AITestList > Settings > Execution.
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/carthack/aitestlist-testing/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/carthack/aitestlist-plugin/main/install.ps1 | iex
 ```
 
 ### Linux / macOS (Bash)
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/carthack/aitestlist-testing/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/carthack/aitestlist-plugin/main/install.sh | bash
 ```
 
 ### Configuration post-installation

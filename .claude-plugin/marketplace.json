@@ -6,15 +6,15 @@
   },
   "metadata": {
     "description": "AI TestList testing ecosystem for Claude Code",
-    "repository": "https://github.com/carthack/aitestlist-testing"
+    "repository": "https://github.com/carthack/aitestlist-plugin"
   },
   "plugins": [
     {
-      "name": "aitestlist-testing",
+      "name": "aitestlist",
       "description": "Create, execute, and report QA tests via Claude Code with AI TestList",
       "source": {
         "source": "github",
-        "repo": "carthack/aitestlist-testing"
+        "repo": "carthack/aitestlist-plugin"
       }
     }
   ]

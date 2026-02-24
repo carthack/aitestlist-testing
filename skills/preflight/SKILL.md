@@ -1,6 +1,6 @@
 ---
 name: preflight
-description: Verification prealable centralisee pour tous les skills aitestlist-testing. Valide le token API, detecte la langue utilisateur, et resout l'URL du serveur. Prechage dans les agents via le champ skills.
+description: Verification prealable centralisee pour tous les skills aitestlist-plugin. Valide le token API, detecte la langue utilisateur, et resout l'URL du serveur. Prechage dans les agents via le champ skills.
 user-invocable: false
 ---
 

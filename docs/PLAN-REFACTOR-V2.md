@@ -20,7 +20,7 @@ qui appellent d'autres skills (pattern fragile, issue #17351). On simplifie tout
 
 ```
 Points d'entree utilisateur:
-  /aitestlist-testing:status     →  skill status (seul visible)
+  /aitestlist-plugin:status     →  skill status (seul visible)
   @test-creator                  →  agent (analyse projet + creation tests)
   @test-executor                 →  agent (execution tests via Playwright)
   @test-reporter                 →  agent (rapport d'erreurs PDF)
@@ -64,13 +64,13 @@ Ajouter `user-invocable: false` dans le frontmatter de:
 
 **agents/test-creator.md:**
 - Ajouter `skills:` field avec: preflight, create-test, create-payment
-- Retirer la reference a "appeler /aitestlist-testing:create-test"
+- Retirer la reference a "appeler /aitestlist-plugin:create-test"
 - Retirer la reference a .aitestlist/project-analysis.md (on scan fresh a chaque fois)
 - L'agent fait: scan projet → genere tests → soumet via API (tout inline)
 
 **agents/test-executor.md:**
 - Ajouter `skills:` field avec: preflight, exec-test, exec-payment, exec-email, exec-db-elevation, report-live
-- Retirer la reference a "appeler /aitestlist-testing:exec-test"
+- Retirer la reference a "appeler /aitestlist-plugin:exec-test"
 - En mode sequentiel: l'agent execute tout directement
 - En mode teams: spawne test-reporter + exec agents en parallele
 
@@ -80,7 +80,7 @@ Ajouter `user-invocable: false` dans le frontmatter de:
 
 ### Etape 5 - Nettoyer les skills
 
-Dans chaque skill qui dit "Appeler /aitestlist-testing:preflight en premiere etape":
+Dans chaque skill qui dit "Appeler /aitestlist-plugin:preflight en premiere etape":
 - Retirer cette instruction
 - Remplacer par un commentaire: "Variables URL, AITESTLIST_TOKEN, USER_LANG disponibles via preflight prechage dans l'agent"
 - Les skills deviennent des "instructions pures" sans logique d'appel
@@ -136,7 +136,7 @@ Mettre a jour la documentation pour refleter:
 ## Verification
 
 1. `commands/` n'existe plus
-2. `/aitestlist-testing:status` fonctionne (seul skill visible dans le menu)
+2. `/aitestlist-plugin:status` fonctionne (seul skill visible dans le menu)
 3. `@test-creator` est invocable et a les instructions preflight + create-test dans son contexte
 4. `@test-executor` est invocable et a les instructions preflight + exec-test + report-live dans son contexte
 5. `@test-reporter` est invocable et a les instructions preflight + report-live + error-report dans son contexte
