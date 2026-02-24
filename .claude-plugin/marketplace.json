@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "aitestlist",
-      "description": "Create, execute, and report QA tests via Claude Code with AI TestList",
+      "description": "Create, execute , and report QA tests via Claude Code with AI TestList",
       "source": {
         "source": "github",
         "repo": "carthack/aitestlist-plugin"
