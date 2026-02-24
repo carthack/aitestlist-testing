@@ -1,6 +1,6 @@
 {
-  "name": "aitestlist-testing",
-  "description": "AI TestList testing ecosystem - create, execute, and report QA tests via Claude Code",
+  "name": "aitestlist",
+  "description": "AI TestList ecosystem - create, execute, and report QA tests via Claude Code",
   "author": {
     "name": "9524-2426 Quebec Inc.",
     "email": "support@aitestlist.com"
