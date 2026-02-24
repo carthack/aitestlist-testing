@@ -1,5 +1,5 @@
 {
-  "name": "aitestlist-plugin",
+  "name": "aitest",
   "description": "AI TestList ecosystem - create, execute, and report QA tests via Claude Code",
   "author": {
     "name": "9524-2426 Quebec Inc.",
